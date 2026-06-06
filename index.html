@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hassan & Laiba Engagement</title>
+<style>
+body{margin:0;font-family:Arial,sans-serif;background:#0b0b0b;color:#fff}
+#welcome{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;background:linear-gradient(135deg,#000,#1a1a1a)}
+.gates{display:flex}
+.gate{width:140px;height:280px;background:linear-gradient(#f5d76e,#a57c00);border:4px solid #ffd700;transition:1.8s}
+.left{transform-origin:left}
+.right{transform-origin:right}
+.open .left{transform:rotateY(-110deg)}
+.open .right{transform:rotateY(110deg)}
+button{padding:14px 30px;border:none;border-radius:30px;background:#d4af37;font-weight:bold;cursor:pointer;margin-top:20px}
+#main{display:none;padding:40px;text-align:center}
+h1{font-size:56px;color:#d4af37}
+.card{max-width:800px;margin:auto;padding:25px;border:1px solid #d4af37;border-radius:18px;background:#151515}
+.countdown{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin-top:20px}
+.box{padding:15px;background:#222;border-radius:12px;min-width:90px}
+.num{font-size:28px;color:#ffd700;font-weight:bold}
+</style>
+</head>
+<body>
+<section id="welcome">
+<h2>You Are Invited</h2>
+<div id="gate" class="gates">
+<div class="gate left"></div>
+<div class="gate right"></div>
+</div>
+<button onclick="openInvitation()">Open Invitation</button>
+</section>
+
+<section id="main">
+<h1>HASSAN & LAIBA</h1>
+<h2>Engagement Ceremony</h2>
+<div class="card">
+<p>Join us for a memorable evening as we celebrate our engagement.</p>
+<p><b>Date:</b> 15 July 2027</p>
+<p><b>Time:</b> 7:00 PM</p>
+<p><b>Venue:</b> FARM HOUSE</p>
+<p><b>Hosted By:</b> Hamza Ahmed & Raza Ahmed</p>
+
+<div class="countdown">
+<div class="box"><div class="num" id="days">0</div>Days</div>
+<div class="box"><div class="num" id="hours">0</div>Hours</div>
+<div class="box"><div class="num" id="minutes">0</div>Minutes</div>
+<div class="box"><div class="num" id="seconds">0</div>Seconds</div>
+</div>
+</div>
+</section>
+
+<script>
+function openInvitation(){
+document.getElementById('gate').classList.add('open');
+setTimeout(()=>{
+document.getElementById('welcome').style.display='none';
+document.getElementById('main').style.display='block';
+},1800);
+}
+const target=new Date("July 15, 2027 19:00:00").getTime();
+setInterval(()=>{
+let now=new Date().getTime();
+let d=target-now;
+document.getElementById('days').innerHTML=Math.floor(d/(1000*60*60*24));
+document.getElementById('hours').innerHTML=Math.floor((d%(1000*60*60*24))/(1000*60*60));
+document.getElementById('minutes').innerHTML=Math.floor((d%(1000*60*60))/(1000*60));
+document.getElementById('seconds').innerHTML=Math.floor((d%(1000*60))/1000);
+},1000);
+</script>
+</body>
+</html>
