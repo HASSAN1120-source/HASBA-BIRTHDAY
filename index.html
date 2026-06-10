@@ -838,6 +838,64 @@ function initFireworks(){
 
 /* ══════════ MUSIC ══════════ */
 let musicPlaying = false;
+let audioCtx = null;
+let melodySources = [];
+let melodyInterval = null;
+
+// Romantic melody notes: freq, duration pairs
+const melody = [
+  [392,0.4],[440,0.4],[494,0.4],[523,0.6],
+  [494,0.3],[440,0.4],[392,0.6],
+  [349,0.4],[392,0.4],[440,0.4],[494,0.6],
+  [440,0.3],[392,0.4],[349,0.8],
+  [392,0.4],[440,0.4],[523,0.4],[587,0.6],
+  [523,0.3],[494,0.4],[440,0.6],
+  [392,0.4],[349,0.4],[330,0.4],[294,0.8],
+  [330,0.4],[349,0.4],[392,0.6],[392,0.8]
+];
+
+function createTone(freq, startTime, duration, vol) {
+  const osc = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+
+  // Main tone - sine wave
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(freq, startTime);
+  gainNode.gain.setValueAtTime(0, startTime);
+  gainNode.gain.linearRampToValueAtTime(vol, startTime + 0.05);
+  gainNode.gain.linearRampToValueAtTime(vol * 0.7, startTime + duration * 0.6);
+  gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+  osc.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.05);
+
+  // Harmony - one octave below, softer
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(freq / 2, startTime);
+  gain2.gain.setValueAtTime(0, startTime);
+  gain2.gain.linearRampToValueAtTime(vol * 0.3, startTime + 0.05);
+  gain2.gain.linearRampToValueAtTime(0, startTime + duration);
+  osc2.connect(gain2);
+  gain2.connect(audioCtx.destination);
+  osc2.start(startTime);
+  osc2.stop(startTime + duration + 0.05);
+}
+
+function playMelodyLoop() {
+  if (!audioCtx || !musicPlaying) return;
+  let t = audioCtx.currentTime + 0.1;
+  for (let i = 0; i < melody.length; i++) {
+    createTone(melody[i][0], t, melody[i][1], 0.18);
+    t += melody[i][1] + 0.06;
+  }
+  const totalDur = melody.reduce((s, n) => s + n[1] + 0.06, 0) * 1000;
+  melodyInterval = setTimeout(() => {
+    if (musicPlaying) playMelodyLoop();
+  }, totalDur);
+}
 
 function initMusic() {
   const btn = document.getElementById('music-btn');
@@ -851,17 +909,17 @@ function initMusic() {
 
 function toggleMusic() {
   const btn = document.getElementById('music-btn');
-  const yt = document.getElementById('yt-player');
   if (!musicPlaying) {
-    yt.style.display = 'block';
-    yt.src = "https://www.youtube.com/embed/HHca-OV_Kfg?autoplay=1&loop=1&playlist=HHca-OV_Kfg&controls=0&showinfo=0&rel=0&modestbranding=1";
-    if (btn) { btn.textContent = '🎶'; btn.classList.add('playing'); }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
     musicPlaying = true;
+    playMelodyLoop();
+    if (btn) { btn.textContent = '🎶'; btn.classList.add('playing'); }
   } else {
-    yt.src = '';
-    yt.style.display = 'none';
-    if (btn) { btn.textContent = '🎵'; btn.classList.remove('playing'); }
     musicPlaying = false;
+    if (melodyInterval) clearTimeout(melodyInterval);
+    if (audioCtx) audioCtx.suspend();
+    if (btn) { btn.textContent = '🎵'; btn.classList.remove('playing'); }
   }
 }
 
@@ -869,17 +927,9 @@ function toggleMusic() {
 
 <!-- MUSIC BUTTON -->
 <button id="music-btn" onclick="toggleMusic()" title="Play music">🎵</button>
-<div class="music-tooltip" id="music-tooltip">Zara Sa — tap to play 🎶</div>
+<div class="music-tooltip" id="music-tooltip">Romantic melody — tap to play 🎶</div>
 
 
-
-<!-- YOUTUBE AUDIO PLAYER (hidden) -->
-<iframe id="yt-player"
-  style="display:none;position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;"
-  src=""
-  allow="autoplay; encrypted-media"
-  allowfullscreen>
-</iframe>
 
 </body>
 </html>
